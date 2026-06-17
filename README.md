@@ -1,5 +1,3 @@
-
-
 local __DARKLUA_BUNDLE_MODULES
 
 __DARKLUA_BUNDLE_MODULES = {
@@ -4347,7 +4345,7 @@ do
                     if shared._inGrowthReset then return false end
                     if shared._inCarcassEat then return false end
                     -- CARNIVORE BLOCK: NEVER auto-eat grass for carnivores
-                    -- (silently skip instead of force-unchecking â€” lets user keep the box toggled)
+                    -- (silently skip instead of force-unchecking — lets user keep the box toggled)
                     local animalName = character:GetAttribute("AnimalName") or ""
                     local CARNIVORES = { Lion=true, Tiger=true, Cheetah=true, Crocodile=true, Leopard=true }
                     if CARNIVORES[animalName] then
@@ -4409,7 +4407,7 @@ do
                     end
 
                     -- PROPER RAGDOLL TELEPORT (from confirmedTP)
-                    -- RAGDOLL TP â€” mirrors confirmedTP from growth loop:
+                    -- RAGDOLL TP — mirrors confirmedTP from growth loop:
                     -- ragdoll -> loop SetPrimaryPartCFrame -> wait -> GettingUp -> verify -> retry
                     local TP_TOLERANCE = 12
                     local function ragdollTeleportToPos(character, targetPos, maxAttempts)
@@ -4439,17 +4437,17 @@ do
                                 local r = character:FindFirstChild("HumanoidRootPart")
                                 if r then
                                     local dist = (r.Position - targetPos).Magnitude
-                                    print(string.format("[CarcassEat] TP attempt %d â€” dist: %.1f studs", attempt, dist))
+                                    print(string.format("[CarcassEat] TP attempt %d — dist: %.1f studs", attempt, dist))
                                     if dist <= TP_TOLERANCE then
                                         print("[CarcassEat] TP confirmed on attempt " .. attempt)
                                         return true
                                     else
-                                        warn("[CarcassEat] Too far (" .. string.format("%.1f", dist) .. " studs) â€” retrying")
+                                        warn("[CarcassEat] Too far (" .. string.format("%.1f", dist) .. " studs) — retrying")
                                     end
                                 end
                             end
                         end
-                        warn("[CarcassEat] TP failed after " .. maxAttempts .. " attempts â€” continuing anyway")
+                        warn("[CarcassEat] TP failed after " .. maxAttempts .. " attempts — continuing anyway")
                         return false
                     end
 
@@ -4493,7 +4491,7 @@ do
                         local root = character:FindFirstChild("HumanoidRootPart")
                         if not root then return end
 
-                        -- Find nearest carcass â€” IMPROVED: large range + GetDescendants (catches nested carcasses)
+                        -- Find nearest carcass — IMPROVED: large range + GetDescendants (catches nested carcasses)
                         local nearest, nearestDist = nil, math.huge
                         local MAX_CARCASS_RANGE = 2500  -- studs
 
@@ -4543,7 +4541,7 @@ do
                         shared._inCarcassEat = true  -- blocks growth loop from firing war TP while we eat
                         print("[CarcassEat] Targeting:", nearest.Name, "dist:", math.floor(nearestDist), "food:", food)
 
-                        -- Top priority â€” stop drink
+                        -- Top priority — stop drink
                         character:SetAttribute('_drinkingToFull', false)
 
                         local hum = character:FindFirstChild("Humanoid")
@@ -4577,7 +4575,7 @@ do
                             eatRemote:FireServer(nearest)
                         end)
                         if ok then
-                            print("[CarcassEat] Fired â€” waiting for food to tick up")
+                            print("[CarcassEat] Fired — waiting for food to tick up")
                         else
                             warn("[CarcassEat] FireServer error:", tostring(err))
                         end
@@ -4628,7 +4626,7 @@ do
                                     relRoot.Anchored = false
                                 end
                                 anchorReleased = true
-                                print("[CarcassEat] Anchor released â€” food:", curFood, "state:", curHum:GetState().Name)
+                                print("[CarcassEat] Anchor released — food:", curFood, "state:", curHum:GetState().Name)
                             elseif tick() > releaseDeadline then
                                 -- Safety release
                                 local relRoot = curChar:FindFirstChild("HumanoidRootPart")
@@ -4643,7 +4641,7 @@ do
                             end
                         end
 
-                        -- Monitor food rising â€” stay idle while the game is ticking food up,
+                        -- Monitor food rising — stay idle while the game is ticking food up,
                         -- so we don't re-TP and knock the lion off the carcass mid-eat.
                         local lastFood = character:GetAttribute("Food") or 0
                         local stallTicks = 0
@@ -4654,7 +4652,7 @@ do
                             if not curChar or curChar ~= character then break end
                             local curFood = curChar:GetAttribute("Food") or 0
                             if curFood >= 95 then
-                                print("[CarcassEat] Food full â€” done")
+                                print("[CarcassEat] Food full — done")
                                 break
                             end
                             if curFood > lastFood then
@@ -4666,13 +4664,13 @@ do
                             else
                                 stallTicks = stallTicks + 1
                                 if stallTicks >= MAX_STALL then
-                                    print("[CarcassEat] Food stalled at " .. curFood .. " â€” ending monitor")
+                                    print("[CarcassEat] Food stalled at " .. curFood .. " — ending monitor")
                                     break
                                 end
                             end
                             -- Safety: if the carcass is gone (eaten up), bail
                             if not nearest.Parent then
-                                print("[CarcassEat] Carcass gone â€” ending monitor")
+                                print("[CarcassEat] Carcass gone — ending monitor")
                                 break
                             end
                         end
@@ -4708,11 +4706,11 @@ do
                             end
                         end
 
-                        -- DO NOT teleport back to grow spawn â€” that was causing the "war location" glitch
+                        -- DO NOT teleport back to grow spawn — that was causing the "war location" glitch
                         -- where the growth loop detected the returned position and fired a war TP.
                         -- Just stay at the carcass spot; the growth loop is blocked while _inCarcassEat is true.
                         if hasMore then
-                            print("[CarcassEat] More carcasses â€” looping")
+                            print("[CarcassEat] More carcasses — looping")
                         else
                             print("[CarcassEat] No more carcasses in range")
                         end
@@ -4735,10 +4733,24 @@ do
                     -- Block during growth reset so we don't fight the reset cycle
                     if shared._inGrowthReset then
                         character:SetAttribute('_drinkingToFull', false)
+                        character:SetAttribute('_anchoredDrinking', false)
+                        local r = character:FindFirstChild("HumanoidRootPart")
+                        if r and r.Anchored then
+                            r.AssemblyLinearVelocity = Vector3.zero
+                            r.AssemblyAngularVelocity = Vector3.zero
+                            r.Anchored = false
+                        end
                         return false
                     end
                     if shared._inCarcassEat then
                         character:SetAttribute('_drinkingToFull', false)
+                        character:SetAttribute('_anchoredDrinking', false)
+                        local r = character:FindFirstChild("HumanoidRootPart")
+                        if r and r.Anchored then
+                            r.AssemblyLinearVelocity = Vector3.zero
+                            r.AssemblyAngularVelocity = Vector3.zero
+                            r.Anchored = false
+                        end
                         return false
                     end
 
@@ -4783,8 +4795,15 @@ do
                             return false
                         end
                         do
+                            local drinkRoot = character:FindFirstChild("HumanoidRootPart")
+                            if drinkRoot and drinkRoot.Anchored then
+                                drinkRoot.AssemblyLinearVelocity = Vector3.zero
+                                drinkRoot.AssemblyAngularVelocity = Vector3.zero
+                                drinkRoot.Anchored = false
+                            end
                             Animal.CancelTween(true)
                             character:SetAttribute('_drinkingToFull', false)
+                            character:SetAttribute('_anchoredDrinking', false)
                             return false
                         end
                         --[[
@@ -4835,9 +4854,19 @@ do
                         ingestionAvaliable = nil
                     end
 
-                    if ingestionAvaliable == 'Drink' then
-                        Animal.CancelTween(true)
-                        SetClientSubStateChangesEnabled(false)
+                    if ingestionAvaliable == 'Drink' or character:GetAttribute('_anchoredDrinking') then
+                        if not character:GetAttribute('_anchoredDrinking') then
+                            Animal.CancelTween(true)
+                            local drinkRoot = character:FindFirstChild("HumanoidRootPart")
+                            if drinkRoot then
+                                drinkRoot.CFrame = CFrame.new(drinkRoot.Position - Vector3.new(0, 3, 0))
+                                drinkRoot.AssemblyLinearVelocity = Vector3.zero
+                                drinkRoot.AssemblyAngularVelocity = Vector3.zero
+                                drinkRoot.Anchored = true
+                            end
+                            character:SetAttribute('_anchoredDrinking', true)
+                            SetClientSubStateChangesEnabled(false)
+                        end
                         ChangeCharacterSubState('Drinking')
                     elseif goToNearestSource() then
                         local root = character:FindFirstChild("HumanoidRootPart")
@@ -4847,10 +4876,10 @@ do
                             return
                         end
 
-                        if root.Anchored then
+                        if root.Anchored and not character:GetAttribute('_anchoredDrinking') then
                             root.Anchored = false
                         end
-                        if humanoid then
+                        if humanoid and not character:GetAttribute('_anchoredDrinking') then
                             humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
                         end
 
@@ -4880,7 +4909,7 @@ do
                                 local waterPosition = waterPart.Position + Vector3.new(0, 2, 0)
                                 Animal.TweenToAsync(CFrame.new(waterPosition))
                             else
-                                -- No MainWaterPart found Ã¢â‚¬â€ scan further out for water terrain
+                                -- No MainWaterPart found â€” scan further out for water terrain
                                 local farShore = nil
                                 for _, dir in directions do
                                     for dist = 4, 200, 8 do
@@ -4946,7 +4975,7 @@ do
 
                         if Animal.IsInsideTerrain() then
                             if isLionOrTiger then
-                                -- Debounced path â€” need several consecutive hits
+                                -- Debounced path — need several consecutive hits
                                 lionTerrainStreak = lionTerrainStreak + 1
                                 if lionTerrainStreak < LION_TERRAIN_REQUIRED then
                                     return  -- wait for more confirmations
@@ -5083,7 +5112,7 @@ task.spawn(function()
         VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
     end)
 end)
--- Anti-AFK Layer 2: proactive â€” nudges camera + virtual input every 4 minutes
+-- Anti-AFK Layer 2: proactive — nudges camera + virtual input every 4 minutes
 -- bypasses games that use their own kick timer independent of Roblox's Idled event
 task.spawn(function()
     local VirtualUser = game:GetService("VirtualUser")
@@ -5139,7 +5168,7 @@ task.spawn(function()
     local player        = Players.LocalPlayer
 
     -- ============================================================
-    -- GAME CONFIG â€” detects which game we're in automatically
+    -- GAME CONFIG — detects which game we're in automatically
     -- ============================================================
     local GAME_CONFIGS = {
         [6174994284] = {
@@ -5221,7 +5250,7 @@ task.spawn(function()
         warn("[GrowthLoop] GameId " .. tostring(game.GameId) .. " not recognised - waiting for character to detect by animal")
         gameConfig = detectConfigByAnimal()
         if not gameConfig then
-            -- Detection failed â€” default to SavannahLife coords so it never TPs to 0,10,0
+            -- Detection failed — default to SavannahLife coords so it never TPs to 0,10,0
             -- Change this to JungleLife config if you're primarily using this on JL
             warn("[GrowthLoop] Detection failed - defaulting to SavannahLife config")
             gameConfig = GAME_CONFIGS[18214855317]
@@ -5270,7 +5299,7 @@ task.spawn(function()
     end
 
     -- ============================================================
-    -- EXISTING SLOTS â€” separate list per game, chosen automatically
+    -- EXISTING SLOTS — separate list per game, chosen automatically
     -- Saved characters are read live; no personal slot names are required.
     -- ============================================================
     local SAVANNAH_SLOTS = {}
@@ -5319,7 +5348,7 @@ task.spawn(function()
         end
 
         if #trackedSlots >= MAX_SLOTS then
-            warn("[GrowthLoop] Tracked slot list already at max capacity â€” skipping add for:", name)
+            warn("[GrowthLoop] Tracked slot list already at max capacity — skipping add for:", name)
             return false
         end
 
@@ -5359,7 +5388,7 @@ task.spawn(function()
     end
 
     -- ============================================================
-    -- NEW SLOTS name pool â€” uses the same slot names as existingSlots, in order
+    -- NEW SLOTS name pool — uses the same slot names as existingSlots, in order
     -- This guarantees the names are real working slots
     -- ============================================================
     local namePool = (gameConfig.name == "JungleLife") and JUNGLE_SLOTS or SAVANNAH_SLOTS
@@ -6021,7 +6050,7 @@ task.spawn(function()
         local attempts = 0
         repeat
             attempts = attempts + 1
-            -- Fire the CFrame repeatedly while anchored â€” position will actually stick
+            -- Fire the CFrame repeatedly while anchored — position will actually stick
             for _ = 1, 30 do
                 local r = character:FindFirstChild("HumanoidRootPart")
                 if r then
@@ -6038,7 +6067,7 @@ task.spawn(function()
                     print("[GrowthLoop] TP confirmed at Y:", yPos)
                     break
                 else
-                    warn("[GrowthLoop] TP still off at Y:", yPos, "â€” retrying (attempt", attempts, ")")
+                    warn("[GrowthLoop] TP still off at Y:", yPos, "— retrying (attempt", attempts, ")")
                 end
             end
         until attempts >= 5
@@ -6091,17 +6120,17 @@ task.spawn(function()
                 local r = character:FindFirstChild("HumanoidRootPart")
                 if r then
                     local dist = (r.Position - targetPos).Magnitude
-                    print(string.format("[GrowthLoop] [%s] TP attempt %d â€” dist: %.1f studs", label, attempt, dist))
+                    print(string.format("[GrowthLoop] [%s] TP attempt %d — dist: %.1f studs", label, attempt, dist))
                     if dist <= TP_TOLERANCE then
                         print("[GrowthLoop] [" .. label .. "] TP confirmed on attempt " .. attempt)
                         return true
                     else
-                        warn("[GrowthLoop] [" .. label .. "] Too far (" .. string.format("%.1f", dist) .. " studs) â€” retrying")
+                        warn("[GrowthLoop] [" .. label .. "] Too far (" .. string.format("%.1f", dist) .. " studs) — retrying")
                     end
                 end
             end
         end
-        warn("[GrowthLoop] [" .. label .. "] Failed after " .. maxAttempts .. " attempts â€” continuing anyway")
+        warn("[GrowthLoop] [" .. label .. "] Failed after " .. maxAttempts .. " attempts — continuing anyway")
         return false
     end
 
@@ -6118,7 +6147,7 @@ task.spawn(function()
                     newChar = ch
                     break
                 elseif charWait >= 5 and cname ~= nil then
-                    warn("[GrowthLoop] Name mismatch expected", charName, "got", cname, "â€” proceeding")
+                    warn("[GrowthLoop] Name mismatch expected", charName, "got", cname, "— proceeding")
                     newChar = ch
                     break
                 elseif charWait >= 8 then
@@ -6143,7 +6172,7 @@ task.spawn(function()
         currentAnimalName = animal
         currentGender     = gender
         currentSkin       = skin
-        print("[GrowthLoop] Slot info â€” Animal:", animal, "| Gender:", gender, "| Skin:", skin)
+        print("[GrowthLoop] Slot info — Animal:", animal, "| Gender:", gender, "| Skin:", skin)
 
         -- Verify this slot's animal matches what this game expects
         -- e.g. Jungle Life expects Gorilla, Savannah Life expects Elephant
@@ -6151,10 +6180,10 @@ task.spawn(function()
         local expectedAnimal = gameConfig.expectedAnimal
         if expectedAnimal and animal ~= expectedAnimal then
             warn("[GrowthLoop] WARNING: Expected", expectedAnimal, "but this slot is", animal,
-                 "â€” growing anyway, but check your slots")
+                 "— growing anyway, but check your slots")
         end
 
-        -- Confirmed TP to grow spawn â€” retries until within TP_TOLERANCE studs
+        -- Confirmed TP to grow spawn — retries until within TP_TOLERANCE studs
         print("[GrowthLoop] Teleporting to grow spawn for " .. gameConfig.name .. " | Animal: " .. animal .. " | Gender: " .. gender)
         confirmedTP(newChar, GROW_SPAWN, "GrowSpawn")
 
@@ -6189,7 +6218,7 @@ task.spawn(function()
         task.wait(1)
         toggleEatDrink(false, "OFF (pass 2)")
         task.wait(1)
-        toggleEatDrink(true,  "ON  (pass 2) â€” grow loop active")
+        toggleEatDrink(true,  "ON  (pass 2) — grow loop active")
     end
 
     -- ============================================================
@@ -6203,7 +6232,7 @@ task.spawn(function()
         local hum  = ch:FindFirstChild("Humanoid")
         if not root or not hum then return end
 
-        print("[GrowthLoop] 100% grown â€” teleporting to war spawn")
+        print("[GrowthLoop] 100% grown — teleporting to war spawn")
         confirmedTP(ch, WAR_SPAWN, "WarSpawn")
         print("[GrowthLoop] War spawn TP done")
     end
@@ -6226,13 +6255,13 @@ task.spawn(function()
             -- Kill auto eat/drink immediately so they don't fight the TP
             if shared._autoEatChecked then shared._autoEatChecked(false) end
             if shared._autoDrinkChecked then shared._autoDrinkChecked(false) end
-            print("[GrowthLoop] Auto eat/drink OFF â€” starting growth reset")
+            print("[GrowthLoop] Auto eat/drink OFF — starting growth reset")
 
             local character = player.Character
             if not character then return end
 
             -- Read animal/gender/skin from the ACTUAL character attributes
-            -- so it works for Gorilla, Elephant, Male, Female â€” anything
+            -- so it works for Gorilla, Elephant, Male, Female — anything
             local animalName, gender, skin = getSlotInfo(character)
             local newName = getUniqueName(animalName)
 
@@ -6285,7 +6314,7 @@ task.spawn(function()
             -- Kill auto eat/drink immediately so they don't fight the TP
             if shared._autoEatChecked then shared._autoEatChecked(false) end
             if shared._autoDrinkChecked then shared._autoDrinkChecked(false) end
-            print("[GrowthLoop] Auto eat/drink OFF â€” starting slot cycle")
+            print("[GrowthLoop] Auto eat/drink OFF — starting slot cycle")
 
             -- Pick the pool based on the CURRENT animal we're growing.
             -- This way Lion cycles through SAVANNAH_LION_SLOTS / JUNGLE_TIGER_SLOTS,
@@ -6320,7 +6349,7 @@ task.spawn(function()
                 return
             end
 
-            -- Check if this slot is already at 100% â€” if so, skip it immediately
+            -- Check if this slot is already at 100% — if so, skip it immediately
             task.wait(1)
             local ch = player.Character
             if ch then
@@ -6346,21 +6375,21 @@ task.spawn(function()
     end
 
     -- ============================================================
-    -- PARK ON SLOT 1 â€” all 40 slots grown, sit and earn passive coins
+    -- PARK ON SLOT 1 — all 40 slots grown, sit and earn passive coins
     -- ============================================================
     local function doParkOnSlotOne()
         local slotOne = existingSlots[1]
         if not slotOne then
-            warn("[GrowthLoop] [Park] existingSlots[1] is nil â€” cannot park")
+            warn("[GrowthLoop] [Park] existingSlots[1] is nil — cannot park")
             return
         end
 
         withLock(function()
-            -- Check current slot growth â€” if not 100%, grow existing first
+            -- Check current slot growth — if not 100%, grow existing first
             local ch = player.Character
             local growth = ch and ch:GetAttribute("GrowthPercentage")
             if growth and growth < 1 then
-                print(string.format("[GrowthLoop] [Park] Current slot not full (%.0f%%) â€” growing existing first", growth * 100))
+                print(string.format("[GrowthLoop] [Park] Current slot not full (%.0f%%) — growing existing first", growth * 100))
                 setParkingModeState(false)
                 growExistingSlots = true
                 task.spawn(function() doExistingSlotCycle() end)
@@ -6379,19 +6408,19 @@ task.spawn(function()
             for attempt = 1, 3 do
                 spawnOk = spawnAndSetup(slotOne)
                 if spawnOk then break end
-                warn("[GrowthLoop] [Park] Spawn attempt " .. attempt .. " failed â€” retrying")
+                warn("[GrowthLoop] [Park] Spawn attempt " .. attempt .. " failed — retrying")
                 task.wait(2)
             end
 
             if not spawnOk then
-                warn("[GrowthLoop] [Park] All spawn attempts failed â€” watchdog will retry")
+                warn("[GrowthLoop] [Park] All spawn attempts failed — watchdog will retry")
                 return
             end
 
             teleportAndEnable(nil, slotOne)
             currentGrowthName = slotOne
             shared._currentGrowthName = slotOne
-            print("[GrowthLoop] [Park] Parked on " .. slotOne .. " â€” passive coins active")
+            print("[GrowthLoop] [Park] Parked on " .. slotOne .. " — passive coins active")
         end)
     end
     doExistingSlotCycle = function()
@@ -6511,7 +6540,7 @@ task.spawn(function()
         withLock(function()
             if parkingMode then
                 -- In parking mode, always recover to slot 1, never anything else
-                print("[GrowthLoop] Death in parking mode â€” recovering slot 1")
+                print("[GrowthLoop] Death in parking mode — recovering slot 1")
                 task.wait(2)
                 task.spawn(doParkOnSlotOne)
                 return
@@ -6555,7 +6584,7 @@ task.spawn(function()
     end)
 
     -- ============================================================
-    -- HEARTBEAT â€” detects 100% and death
+    -- HEARTBEAT — detects 100% and death
     -- ============================================================
     RunService.Heartbeat:Connect(function()
         if isLooping then return end
@@ -6572,7 +6601,7 @@ task.spawn(function()
             local bothOn = growExistingSlots and growNewSlots
 
             if parkingMode then
-                -- All 40 slots fully grown â€” just sit on slot 1 and eat/drink, do nothing
+                -- All 40 slots fully grown — just sit on slot 1 and eat/drink, do nothing
                 return
             end
 
@@ -6585,7 +6614,7 @@ task.spawn(function()
                     if slotsGrownThisCycle >= originalSlotCount then
                         allExistingGrown = true
                         slotsGrownThisCycle = 0
-                        print("[GrowthLoop] [Smart] All " .. originalSlotCount .. " original slots grown â€” now creating new slots")
+                        print("[GrowthLoop] [Smart] All " .. originalSlotCount .. " original slots grown — now creating new slots")
                     end
                     task.spawn(doExistingSlotCycle)
                 elseif getTrackedSlotTotal() < MAX_SLOTS then
@@ -6593,9 +6622,9 @@ task.spawn(function()
                     print("[GrowthLoop] [Smart] Creating new slot (" .. getTrackedSlotTotal() .. "/" .. MAX_SLOTS .. ")")
                     task.spawn(doGrowthReset)
                 else
-                    -- All 40 slots exist and grown â€” park on slot 1
+                    -- All 40 slots exist and grown — park on slot 1
                     setParkingModeState(true)
-                    print("[GrowthLoop] [Smart] All " .. MAX_SLOTS .. " slots grown â€” parking on slot 1 for passive coins")
+                    print("[GrowthLoop] [Smart] All " .. MAX_SLOTS .. " slots grown — parking on slot 1 for passive coins")
                     task.spawn(doParkOnSlotOne)
                 end
             elseif growExistingSlots then
@@ -6625,7 +6654,7 @@ task.spawn(function()
     end)
 
     -- ============================================================
-    -- HUD â€” compact slot counter, top-right
+    -- HUD — compact slot counter, top-right
     -- ============================================================
     local hudGui = Instance.new("ScreenGui")
     hudGui.Name = "GrowthLoopHUD"
@@ -6695,7 +6724,7 @@ task.spawn(function()
             task.wait(0.5)
             local ch = player.Character
             local growth = ch and ch:GetAttribute("GrowthPercentage") or 0
-            local slotName = currentGrowthName or "â€”"
+            local slotName = currentGrowthName or "—"
             local growthPct = math.floor(growth * 100)
 
             local trackedTotal = getTrackedSlotTotal()
@@ -6766,14 +6795,14 @@ task.spawn(function()
             local hasRoot   = ch and ch:FindFirstChild("HumanoidRootPart") ~= nil
             local hasGrowth = ch and ch:GetAttribute("GrowthPercentage") ~= nil
 
-            -- PARKING MODE recovery â€” separate fast path, don't skip it
+            -- PARKING MODE recovery — separate fast path, don't skip it
             if parkingMode then
                 if not hasRoot or not hasGrowth then
                     parkStuckTimer = parkStuckTimer + 15
-                    warn(string.format("[Watchdog] [Park] No character for %ds â€” recovering slot 1", parkStuckTimer))
+                    warn(string.format("[Watchdog] [Park] No character for %ds — recovering slot 1", parkStuckTimer))
                     if parkStuckTimer >= PARK_STUCK_THRESHOLD then
                         parkStuckTimer = 0
-                        warn("[Watchdog] [Park] Recovering â€” respawning slot 1 for passive coins")
+                        warn("[Watchdog] [Park] Recovering — respawning slot 1 for passive coins")
                         if isLooping then
                             forceUnlockGrowthLoop("parking menu watchdog")
                         end
@@ -6792,10 +6821,10 @@ task.spawn(function()
             end
 
             -- Normal mode: only trigger if character is MISSING entirely (in menu)
-            -- NOT if growth is just ticking slowly â€” growth can take 4+ min per tick
+            -- NOT if growth is just ticking slowly — growth can take 4+ min per tick
             if not hasRoot or not hasGrowth then
                 stuckTimer = stuckTimer + 15
-                warn(string.format("[Watchdog] No character/growth for %ds â€” stuck in menu?", stuckTimer))
+                warn(string.format("[Watchdog] No character/growth for %ds — stuck in menu?", stuckTimer))
 
                 if stuckTimer >= STUCK_THRESHOLD then
                     stuckTimer = 0
@@ -6807,7 +6836,7 @@ task.spawn(function()
                         and getFirstExistingSlotRecord()
                         or nil
                     local recoverSlot = currentGrowthName or (fallbackEntry and fallbackEntry.CharacterName)
-                    warn("[Watchdog] Stuck threshold reached â€” recovering slot: " .. tostring(recoverSlot))
+                    warn("[Watchdog] Stuck threshold reached — recovering slot: " .. tostring(recoverSlot))
 
                     withLock(function()
                         if shared._autoEatChecked then shared._autoEatChecked(false) end
@@ -6828,7 +6857,7 @@ task.spawn(function()
                             currentGender = gender
                             currentSkin = skin
                             if g and g >= 1 then
-                                print("[Watchdog] Recovered slot already 100% â€” triggering next cycle")
+                                print("[Watchdog] Recovered slot already 100% — triggering next cycle")
                                 if growExistingSlots then
                                     task.spawn(doExistingSlotCycle)
                                 elseif growNewSlots then
@@ -6836,14 +6865,14 @@ task.spawn(function()
                                 end
                                 return
                             end
-                            print("[Watchdog] Recovery slot info â€” Animal:", animal, "| Gender:", gender, "| Skin:", skin)
+                            print("[Watchdog] Recovery slot info — Animal:", animal, "| Gender:", gender, "| Skin:", skin)
                             task.wait(1)
                         end
 
                         teleportAndEnable(nil, recoverSlot)
                         currentGrowthName = recoverSlot
                         shared._currentGrowthName = recoverSlot
-                        print("[Watchdog] Recovery complete â€” now growing: " .. tostring(recoverSlot))
+                        print("[Watchdog] Recovery complete — now growing: " .. tostring(recoverSlot))
                     end)
                 end
             else
@@ -6855,7 +6884,7 @@ task.spawn(function()
     -- ============================================================
     -- EAT/DRINK RELIABILITY WATCHDOG
     -- If food OR water drops to 40% or below, cycle off->on
-    -- Then wait 15s and check again â€” if still not recovering, cycle again
+    -- Then wait 15s and check again — if still not recovering, cycle again
     -- IMPORTANT: Only runs for Lion/Tiger (since they're the only ones using
     -- auto eat carcass). Cycles AUTO EAT CARCASS + AUTO DRINK only, never auto eat.
     -- ============================================================
@@ -6873,7 +6902,7 @@ task.spawn(function()
             local ch = player.Character
             if not ch then continue end
 
-            -- LION/TIGER ONLY â€” no watchdog cycling for other animals
+            -- LION/TIGER ONLY — no watchdog cycling for other animals
             local animalName = ch:GetAttribute("AnimalName") or ""
             if animalName ~= "Lion" and animalName ~= "Tiger" then continue end
 
@@ -6890,7 +6919,7 @@ task.spawn(function()
                 inCycle = true
                 local triggerStat = food <= LOW_THRESHOLD and "Food" or "Water"
                 local triggerVal  = food <= LOW_THRESHOLD and food or water
-                warn(string.format("[EatDrinkWatchdog] [%s] %s at %.1f%% â€” cycling carcass/drink", animalName, triggerStat, triggerVal))
+                warn(string.format("[EatDrinkWatchdog] [%s] %s at %.1f%% — cycling carcass/drink", animalName, triggerStat, triggerVal))
 
                 -- Cycle off -> on (CARCASS + DRINK only, NEVER auto eat)
                 if shared._autoEatCarcassChecked then shared._autoEatCarcassChecked(false) end
@@ -6898,7 +6927,7 @@ task.spawn(function()
                 task.wait(1)
                 if shared._autoEatCarcassChecked then shared._autoEatCarcassChecked(true)  end
                 if shared._autoDrinkChecked      then shared._autoDrinkChecked(true)       end
-                print("[EatDrinkWatchdog] Cycled ON â€” waiting " .. RECHECK_WAIT .. "s to verify recovery")
+                print("[EatDrinkWatchdog] Cycled ON — waiting " .. RECHECK_WAIT .. "s to verify recovery")
 
                 task.wait(RECHECK_WAIT)
 
@@ -6910,7 +6939,7 @@ task.spawn(function()
                 if food2 and water2 then
                     local stillLow = food2 <= LOW_THRESHOLD or water2 <= LOW_THRESHOLD
                     if stillLow then
-                        warn(string.format("[EatDrinkWatchdog] Still low after %ds (Food:%.1f Water:%.1f) â€” cycling again", RECHECK_WAIT, food2, water2))
+                        warn(string.format("[EatDrinkWatchdog] Still low after %ds (Food:%.1f Water:%.1f) — cycling again", RECHECK_WAIT, food2, water2))
                         if shared._autoEatCarcassChecked then shared._autoEatCarcassChecked(false) end
                         if shared._autoDrinkChecked      then shared._autoDrinkChecked(false)      end
                         task.wait(1)
@@ -6918,7 +6947,7 @@ task.spawn(function()
                         if shared._autoDrinkChecked      then shared._autoDrinkChecked(true)       end
                         print("[EatDrinkWatchdog] Second cycle done")
                     else
-                        print(string.format("[EatDrinkWatchdog] Recovered â€” Food:%.1f Water:%.1f", food2, water2))
+                        print(string.format("[EatDrinkWatchdog] Recovered — Food:%.1f Water:%.1f", food2, water2))
                     end
                 end
 
