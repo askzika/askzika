@@ -1,3 +1,4 @@
+
 local __DARKLUA_BUNDLE_MODULES
 
 __DARKLUA_BUNDLE_MODULES = {
@@ -4462,7 +4463,7 @@ do
                         -- WATER PRIORITY: if water <= 30, let auto drink recover to 100 first.
                         -- This stops carcass eat from interrupting an emergency drink session.
                         local curWater = character:GetAttribute("Water") or 100
-                        if curWater <= 60 then
+                        if curWater <= 30 then
                             -- Make sure drink-to-full flag is set so auto drink doesn't bail
                             character:SetAttribute('_drinkingToFull', true)
                             return false
@@ -4733,24 +4734,10 @@ do
                     -- Block during growth reset so we don't fight the reset cycle
                     if shared._inGrowthReset then
                         character:SetAttribute('_drinkingToFull', false)
-                        character:SetAttribute('_anchoredDrinking', false)
-                        local r = character:FindFirstChild("HumanoidRootPart")
-                        if r and r.Anchored then
-                            r.AssemblyLinearVelocity = Vector3.zero
-                            r.AssemblyAngularVelocity = Vector3.zero
-                            r.Anchored = false
-                        end
                         return false
                     end
                     if shared._inCarcassEat then
                         character:SetAttribute('_drinkingToFull', false)
-                        character:SetAttribute('_anchoredDrinking', false)
-                        local r = character:FindFirstChild("HumanoidRootPart")
-                        if r and r.Anchored then
-                            r.AssemblyLinearVelocity = Vector3.zero
-                            r.AssemblyAngularVelocity = Vector3.zero
-                            r.Anchored = false
-                        end
                         return false
                     end
 
@@ -4765,7 +4752,7 @@ do
 
                     -- Savannah can wait longer; Jungle keeps the safer early drink trigger.
                     local water = character:GetAttribute('Water') or 0
-                    local drinkTrigger = shared._growthGameName == "SavannahLife" and 75 or 90
+                    local drinkTrigger = shared._growthGameName == "SavannahLife" and 55 or 90
                     if water <= drinkTrigger then
                         character:SetAttribute('_drinkingToFull', true)
                     end
@@ -4795,15 +4782,8 @@ do
                             return false
                         end
                         do
-                            local drinkRoot = character:FindFirstChild("HumanoidRootPart")
-                            if drinkRoot and drinkRoot.Anchored then
-                                drinkRoot.AssemblyLinearVelocity = Vector3.zero
-                                drinkRoot.AssemblyAngularVelocity = Vector3.zero
-                                drinkRoot.Anchored = false
-                            end
                             Animal.CancelTween(true)
                             character:SetAttribute('_drinkingToFull', false)
-                            character:SetAttribute('_anchoredDrinking', false)
                             return false
                         end
                         --[[
@@ -4854,19 +4834,9 @@ do
                         ingestionAvaliable = nil
                     end
 
-                    if ingestionAvaliable == 'Drink' or character:GetAttribute('_anchoredDrinking') then
-                        if not character:GetAttribute('_anchoredDrinking') then
-                            Animal.CancelTween(true)
-                            local drinkRoot = character:FindFirstChild("HumanoidRootPart")
-                            if drinkRoot then
-                                drinkRoot.CFrame = CFrame.new(drinkRoot.Position - Vector3.new(0, 3, 0))
-                                drinkRoot.AssemblyLinearVelocity = Vector3.zero
-                                drinkRoot.AssemblyAngularVelocity = Vector3.zero
-                                drinkRoot.Anchored = true
-                            end
-                            character:SetAttribute('_anchoredDrinking', true)
-                            SetClientSubStateChangesEnabled(false)
-                        end
+                    if ingestionAvaliable == 'Drink' then
+                        Animal.CancelTween(true)
+                        SetClientSubStateChangesEnabled(false)
                         ChangeCharacterSubState('Drinking')
                     elseif goToNearestSource() then
                         local root = character:FindFirstChild("HumanoidRootPart")
@@ -4876,10 +4846,10 @@ do
                             return
                         end
 
-                        if root.Anchored and not character:GetAttribute('_anchoredDrinking') then
+                        if root.Anchored then
                             root.Anchored = false
                         end
-                        if humanoid and not character:GetAttribute('_anchoredDrinking') then
+                        if humanoid then
                             humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
                         end
 
